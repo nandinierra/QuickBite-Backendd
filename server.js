@@ -11,12 +11,12 @@ import cookieParser from "cookie-parser"
 import cartroute from "./route/cart.route.js";
 const app=express(); 
 
-const port=process.env.PORT;
+const port=process.env.PORT || 3060;
 const url=process.env.URL;
 
 
 app.use(cors({
-  origin: "http://localhost:5173", 
+  origin: ["http://localhost:5173", "https://quick-bite-frontend-eosin.vercel.app"], 
   credentials: true,}  ));
 app.use(express.json())
 app.use(cookieParser()) 
