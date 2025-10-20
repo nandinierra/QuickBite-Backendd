@@ -40,11 +40,16 @@ export async function registerUser(req, res){
 }
 
 
-export async function loginUser(req, res){
+export async function loginUser(req, res){ 
+
      const {email, password}=req.body; 
      try{
         const existingUser=await UserModel.findOne({email});
-        
+        if (email=="" || password==""){
+              return res.status(400).json({
+                message:"enter valid credentials"
+            })
+        }
         if(!existingUser){
             return res.status(400).json({
                 message:"user with this email not found"
