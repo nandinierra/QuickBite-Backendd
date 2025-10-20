@@ -2,34 +2,46 @@
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"; 
 import UserModel from "../model/user.model.js"; 
-
+import {z} from "zod";
 
 
 export async function registerUser(req, res){
     
-    const {name, email, password}=   req.body;
+    const {name, email, password}= req.body;
+     const UserRules=z.object({
+        name:z.string().min(5).max(20),
+        email:z.email(),
+        password:z.string().min(4).max(12)
+        }) 
+         //validating the above rules
+         const result=UserRules.safeParse({name, email, password})
+     
+         //if input validation fails then send the below validations
+         if(!result.success){
+             res.status(400).json({
+                 message:"Check the Input",
+                 error:result.error
+             })
+             return;
+         }
+
+
     try{
-        const existingUser=await UserModel.findOne({name, email});
+        const existingUser=await UserModel.findOne({email});
         if(existingUser){
-            res.status(400).json({
+          return  res.status(400).json({
                 message:"user already exists"
             })
         }
-
-        else{
             const hashedPassword=await bcrypt.hash(password, 10); 
             const newUser=await UserModel.create({
                 name, 
                 email,
                 password:hashedPassword
              })
-             res.status(200).json({
+             res.status(201).json({
                 message:newUser
              })
-
-
-        }
-
     }catch(e){
         res.status(500).json({
             message:e
