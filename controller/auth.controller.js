@@ -5,6 +5,7 @@ import UserModel from "../model/user.model.js";
 import {z} from "zod";
 
 
+
 export async function registerUser(req, res){
     
     const {name, email, password}= req.body;
@@ -23,7 +24,8 @@ export async function registerUser(req, res){
                  error:result.error
              })
              return;
-         }
+        }
+         
 
 
     try{
@@ -50,6 +52,10 @@ export async function registerUser(req, res){
 
 
 }
+
+
+
+
 
 
 export async function loginUser(req, res){ 
