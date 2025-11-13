@@ -3,7 +3,6 @@
 import jwt from "jsonwebtoken"
 
 export const verifyUser=(req, res, next)=>{
-   //  const token = req.cookies.token;
    const headers = req.headers.authorization
     const token = headers?.split(" ")[1]
     if(!token){

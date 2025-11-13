@@ -37,7 +37,8 @@ app.post("/post", (req,res)=>{
 
 app.use("/foodItems", route);
 app.use("/auth", authRoute);
-app.use("/cart", cartroute)
+app.use("/cart", cartroute);
+
 connectDb(url);
 
 app.listen(port, ()=>{

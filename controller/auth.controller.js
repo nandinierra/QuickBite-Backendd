@@ -1,4 +1,6 @@
 
+
+
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"; 
 import UserModel from "../model/user.model.js"; 
@@ -100,8 +102,6 @@ export async function loginUser(req, res){
          })
      }
  
-
-
 }
 
 export const finalRes=(req, res)=>{

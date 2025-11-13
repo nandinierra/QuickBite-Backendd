@@ -23,7 +23,7 @@ export const getfooddetails=async (req, res)=>{
 
 
 export const getpopularDishes= async (req, res)=>{
-    const items=await foodModel.find({popular:true});
+    const items=await foodModel.find({popular:true}).lean();
     res.status(201).json({
         food:items
     })

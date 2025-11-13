@@ -3,8 +3,6 @@ import { CartModel } from "../model/cart.model.js";
 
 
 
-
-
 export async function addToCart(req,res){
    const user = req.user 
    console.log("user", user)
@@ -13,7 +11,7 @@ export async function addToCart(req,res){
    
    try{
     const {itemId,quantity,size} = req.body
-     const cart = await CartModel.findOne({userId})
+    const cart = await CartModel.findOne({userId})
 
      if(!cart){
         const item = await CartModel.create({userId,foodItems:[{itemId,quantity,size}]})
@@ -25,8 +23,9 @@ export async function addToCart(req,res){
             cart.foodItems.push({itemId,quantity,size})
             res.status(200).json({message : "Your Item has added to the cart successfully."})
         }
+
         else{
-            existingItem.quantity += 1 ;
+            existingItem.quantity += quantity ;
               if (size && existingItem.size !== size) {
                 existingItem.size = size;
               }
@@ -41,12 +40,15 @@ export async function addToCart(req,res){
 }
 
 
-export async function getCartItems(req,res){
+
+
+export async function getCartItems(req, res){
   try{
     const userId = req.user._id 
     console.log(userId)
-    const data = await CartModel.findOne({userId}).populate("foodItems.itemId")
-    res.status(200).json(data)
+    const data = await CartModel.findOne({userId}).populate("foodItems.itemId").lean();
+    const length=data.foodItems.length
+    res.status(200).json({data, length})
   }
   catch(e){
     res.status(400).json({message : e})
@@ -87,6 +89,8 @@ export async function updateCartItem(req,res){
   }
 }
 
+
+
 export async function deleteCartItem(req,res){
 
  try{
@@ -109,7 +113,7 @@ export async function clearCart(req,res){
   try {
      const userId = req.user._id 
     const clearedProducts = await CartModel.deleteOne({userId})
-    res.status(200).json({message:"Cleared the cart successfully ..."})
+    res.status(200).json({message:"Cleared the cart successfully..."})
   }
   catch(e){
     res.status(400).json({message:e})
