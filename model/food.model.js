@@ -1,3 +1,4 @@
+
 import mongoose from "mongoose"; 
 
 const foodSchema=new mongoose.Schema({
@@ -24,16 +25,34 @@ const foodSchema=new mongoose.Schema({
         regular:{type:Number, required:true},
         medium:{type:Number, required:true},
         large:{type:Number, required:true}
-
     },
     image:{
         type:String      
     },
     rating:{
         type:String
+    },
+    createdBy:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"user",
+        required:true
+    },
+    lastUpdatedBy:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"user"
+    },
+    isActive:{
+        type:Boolean,
+        default:true
+    },
+    createdAt:{
+        type:Date,
+        default:Date.now
+    },
+    updatedAt:{
+        type:Date,
+        default:Date.now
     }
-
-
 })
  
 
