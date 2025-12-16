@@ -13,7 +13,7 @@ export const getfooddetails = async (req, res) => {
   try {
     const { category } = req.params;
     const items = await foodModel
-      .find({ category, isActive: true })
+      .find({ category: { $regex: `^${category}$`, $options: "i" }, isActive: true })
       .lean();
 
     return res.status(200).json({ food: items });
@@ -22,11 +22,12 @@ export const getfooddetails = async (req, res) => {
   }
 };
 
-// Popular dishes (only active)
+// Popular dishes (only active, sorted by rating)
 export const getpopularDishes = async (_req, res) => {
   try {
     const items = await foodModel
       .find({ popular: true, isActive: true })
+      .sort({ rating: -1, createdAt: -1 })
       .lean();
 
     return res.status(200).json({ food: items });
@@ -41,7 +42,7 @@ export const filterfood = async (req, res) => {
     const { type, search } = req.query;
     const { category } = req.params;
 
-    const filter = { category, isActive: true };
+    const filter = { category: { $regex: `^${category}$`, $options: "i" }, isActive: true };
 
     if (type && type !== "All") {
       filter.type = type;
