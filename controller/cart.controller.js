@@ -1,6 +1,6 @@
 
 import { CartModel } from "../model/cart.model.js";
-import { foodModel } from "../model/food.model.js";
+import foodModel from "../model/food.model.js";
 
 
 

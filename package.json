@@ -3,12 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-
-
-
-
-
-
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
@@ -18,9 +12,6 @@
   "author": "",
   "license": "ISC",
   "type": "module",
-
-
-
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
@@ -29,6 +20,7 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.0",
+    "razorpay": "^2.9.6",
     "zod": "^4.1.12"
   }
 }

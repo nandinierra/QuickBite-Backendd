@@ -5,8 +5,7 @@ import {z} from "zod";
 
 const ROLE_PERMISSIONS = {
   customer: ["read_food"],
-  admin: ["read_food", "create_food", "update_food", "delete_food", "manage_users", "view_orders", "manage_orders"],
-  moderator: ["read_food", "view_orders", "manage_orders"]
+  admin: ["read_food", "create_food", "update_food", "delete_food", "manage_users", "view_orders", "manage_orders"]
 };
 
 export async function registerUser(req, res){
@@ -16,7 +15,7 @@ export async function registerUser(req, res){
         name:z.string().min(5).max(20),
         email:z.email(),
         password:z.string().min(4).max(12),
-        role:z.enum(["customer", "admin", "moderator"]).optional(),
+        role:z.enum(["customer", "admin"]).optional(),
         adminSecretKey:z.string().optional()
     });
     
