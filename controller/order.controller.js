@@ -36,26 +36,39 @@ export async function createOrder(req, res) {
     const items = [];
 
     for (const item of cart.foodItems) {
-      const foodItem = await foodModel.findById(item.itemId._id);
+      if (!item.itemId) {
+        console.error("Item reference is null:", item);
+        return res.status(404).json({ 
+          message: "One or more items in cart are no longer available" 
+        });
+      }
+
+      const foodItem = item.itemId._id ? await foodModel.findById(item.itemId._id) : item.itemId;
       
       if (!foodItem) {
         return res.status(404).json({ 
-          message: `Food item ${item.itemId.name} not found` 
+          message: "Food item not found" 
         });
       }
 
       if (!foodItem.isActive) {
         return res.status(400).json({ 
-          message: `${foodItem.name} is no longer available` 
+          message: `${foodItem.name || "Item"} is no longer available` 
+        });
+      }
+
+      if (!item.size) {
+        return res.status(400).json({ 
+          message: "Item size is missing" 
         });
       }
 
       const priceKey = item.size.toLowerCase();
-      const itemPrice = foodItem.price[priceKey];
+      const itemPrice = foodItem.price?.[priceKey];
 
       if (!itemPrice) {
         return res.status(400).json({ 
-          message: `Invalid size: ${item.size}` 
+          message: `Invalid size: ${item.size} for ${foodItem.name || "item"}` 
         });
       }
 
@@ -72,7 +85,7 @@ export async function createOrder(req, res) {
       });
     }
 
-    const orderId = `ORD-${Date.now()}-${userId}`;
+    const orderId = `ORD-${Date.now().toString().slice(-10)}`;
     const amountInPaisa = Math.round(totalAmount * 100);
 
     const razorpayOrder = await getRazorpayInstance().orders.create({
@@ -81,7 +94,6 @@ export async function createOrder(req, res) {
       receipt: orderId,
       notes: {
         userId: userId.toString(),
-        orderId: orderId,
         ...notes
       }
     });
