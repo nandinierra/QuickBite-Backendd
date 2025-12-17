@@ -72,7 +72,8 @@ export async function registerUser(req, res){
                 name:newUser.name,
                 email:newUser.email,
                 role:newUser.role,
-                permissions:newUser.permissions
+                permissions:newUser.permissions,
+                profilePicture:newUser.profilePicture
             }
         })
     }catch(e){
@@ -130,7 +131,8 @@ export async function loginUser(req, res){
                name:existingUser.name,
                email:existingUser.email,
                role:existingUser.role,
-               permissions:existingUser.permissions
+               permissions:existingUser.permissions,
+               profilePicture:existingUser.profilePicture
            }
        })
      }catch(e){
@@ -148,7 +150,8 @@ export const finalRes=(req, res)=>{
            _id:req.user._id,
            email:req.user.email,
            role:req.user.role,
-           permissions:req.user.permissions
+           permissions:req.user.permissions,
+           profilePicture:req.user.profilePicture
        }
     })
 }
