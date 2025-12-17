@@ -342,3 +342,72 @@ export async function updateOrderStatus(req, res) {
     });
   }
 }
+
+export async function retryPayment(req, res) {
+  try {
+    const userId = req.user._id;
+    const { orderId } = req.params;
+
+    const order = await OrderModel.findOne({ 
+      _id: orderId, 
+      userId 
+    });
+
+    if (!order) {
+      return res.status(404).json({ 
+        message: "Order not found" 
+      });
+    }
+
+    if (order.paymentStatus === "success") {
+      return res.status(400).json({ 
+        message: "Payment for this order has already been completed" 
+      });
+    }
+
+    if (order.paymentStatus === "failed") {
+      return res.status(400).json({ 
+        message: "Payment for this order has failed. Please contact support" 
+      });
+    }
+
+    const amountInPaisa = Math.round(order.totalAmount * 100);
+
+    const razorpayOrder = await getRazorpayInstance().orders.create({
+      amount: amountInPaisa,
+      currency: "INR",
+      receipt: `${order.orderId}-retry`,
+      notes: {
+        userId: userId.toString(),
+        originalOrderId: order._id.toString(),
+        retryAttempt: true
+      }
+    });
+
+    await OrderModel.findByIdAndUpdate(
+      orderId,
+      {
+        razorpayOrderId: razorpayOrder.id,
+        updatedAt: new Date()
+      },
+      { new: true }
+    );
+
+    res.status(200).json({
+      message: "Payment retry initiated successfully",
+      order: {
+        id: order._id,
+        orderId: order.orderId,
+        razorpayOrderId: razorpayOrder.id,
+        amount: order.totalAmount,
+        currency: "INR"
+      }
+    });
+
+  } catch (error) {
+    console.error("Error in retryPayment:", error);
+    res.status(500).json({ 
+      message: error.message || "Failed to retry payment" 
+    });
+  }
+}

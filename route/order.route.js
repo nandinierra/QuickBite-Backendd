@@ -5,7 +5,8 @@ import {
   getUserOrders,
   getOrderDetails,
   cancelOrder,
-  updateOrderStatus
+  updateOrderStatus,
+  retryPayment
 } from "../controller/order.controller.js";
 import { verifyUser, verifyAdmin } from "../middleware/auth.js";
 
@@ -13,6 +14,7 @@ const orderRoute = Router();
 
 orderRoute.post("/create", verifyUser, createOrder);
 orderRoute.post("/verify-payment", verifyUser, verifyPayment);
+orderRoute.post("/:orderId/retry-payment", verifyUser, retryPayment);
 orderRoute.get("/my-orders", verifyUser, getUserOrders);
 orderRoute.get("/:orderId", verifyUser, getOrderDetails);
 orderRoute.patch("/:orderId/cancel", verifyUser, cancelOrder);
