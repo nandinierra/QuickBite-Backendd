@@ -143,15 +143,28 @@ export async function loginUser(req, res){
  
 }
 
-export const finalRes=(req, res)=>{
-    res.status(200).json({
-       message:"Valid User",
-       user:{
-           _id:req.user._id,
-           email:req.user.email,
-           role:req.user.role,
-           permissions:req.user.permissions,
-           profilePicture:req.user.profilePicture
-       }
-    })
+export const finalRes=async(req, res)=>{
+    try{
+        const user = await UserModel.findById(req.user._id).select("-password");
+        if(!user){
+            return res.status(404).json({
+                message:"User not found"
+            })
+        }
+        res.status(200).json({
+           message:"Valid User",
+           user:{
+               _id:user._id,
+               name:user.name,
+               email:user.email,
+               role:user.role,
+               permissions:user.permissions,
+               profilePicture:user.profilePicture
+           }
+        })
+    }catch(error){
+        res.status(500).json({
+            message:error.message || "Failed to verify user"
+        })
+    }
 }

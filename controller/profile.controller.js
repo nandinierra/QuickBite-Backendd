@@ -106,6 +106,7 @@ export async function updateUserProfile(req, res) {
         email: updatedUser.email,
         phone: updatedUser.phone,
         address: updatedUser.address,
+        profilePicture: updatedUser.profilePicture,
         role: updatedUser.role,
         isActive: updatedUser.isActive,
         updatedAt: updatedUser.updatedAt,
