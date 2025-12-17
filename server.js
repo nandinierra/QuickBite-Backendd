@@ -9,6 +9,7 @@ import {connectDb} from "./config/db.js";
 import authRoute from "./route/auth.route.js";
 import cookieParser from "cookie-parser"
 import cartroute from "./route/cart.route.js";
+import orderRoute from "./route/order.route.js";
 const app=express(); 
 
 const port=process.env.PORT || 3060;
@@ -38,6 +39,7 @@ app.post("/post", (req,res)=>{
 app.use("/foodItems", route);
 app.use("/auth", authRoute);
 app.use("/cart", cartroute);
+app.use("/orders", orderRoute);
 
 connectDb(url);
 
