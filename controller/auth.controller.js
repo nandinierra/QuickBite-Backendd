@@ -5,28 +5,47 @@ import {z} from "zod";
 
 const ROLE_PERMISSIONS = {
   customer: ["read_food"],
-  admin: ["read_food", "create_food", "update_food", "delete_food", "manage_users", "view_orders", "manage_orders"]
+  admin: ["read_food", "create_food", "update_food", "delete_food", "manage_users", "view_orders", "manage_orders"],
+  moderator: ["read_food", "view_orders", "manage_orders"]
 };
 
 export async function registerUser(req, res){
     
     const {name, email, password, role, adminSecretKey}= req.body;
-    const UserRules=z.object({
-        name:z.string().min(5).max(20),
-        email:z.email(),
-        password:z.string().min(4).max(12),
-        role:z.enum(["customer", "admin"]).optional(),
-        adminSecretKey:z.string().optional()
+    
+    // Enhanced Zod validation with detailed error messages
+    const UserRules = z.object({
+        name: z.string()
+            .min(3, "Name must be at least 3 characters long")
+            .max(50, "Name must not exceed 50 characters")
+            .regex(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces")
+            .trim(),
+        email: z.string()
+            .email("Please enter a valid email address")
+            .toLowerCase()
+            .trim(),
+        password: z.string()
+            .min(6, "Password must be at least 6 characters long")
+            .max(50, "Password must not exceed 50 characters")
+            .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Password must contain at least one uppercase letter, one lowercase letter, and one number"),
+        role: z.enum(["customer", "admin", "moderator"], {
+            errorMap: () => ({ message: "Role must be either customer, admin, or moderator" })
+        }).optional().default("customer"),
+        adminSecretKey: z.string().optional()
     });
     
-    const result=UserRules.safeParse({name, email, password, role, adminSecretKey});
+    const result = UserRules.safeParse({name, email, password, role, adminSecretKey});
     
     if(!result.success){
-        res.status(400).json({
-            message:"Check the Input",
-            error:result.error
-        })
-        return;
+        const errors = result.error.errors.map(err => ({
+            field: err.path.join('.'),
+            message: err.message
+        }));
+        
+        return res.status(400).json({
+            message: "Validation failed",
+            errors: errors
+        });
     }
     
     try{
@@ -37,29 +56,31 @@ export async function registerUser(req, res){
             })
         }
         
-        const userRole = role || "customer";
+        const userRole = result.data.role || "customer";
         
         if(userRole === "admin"){
             const correctAdminSecret = process.env.ADMIN_SECRET_KEY;
-            if(!adminSecretKey || adminSecretKey.trim() === ""){
+            if(!result.data.adminSecretKey || result.data.adminSecretKey.trim() === ""){
                 return res.status(400).json({
-                    message:"Admin secret key is required for admin registration"
+                    message: "Admin secret key is required for admin registration",
+                    errors: [{ field: "adminSecretKey", message: "Admin secret key is required" }]
                 })
             }
-            if(adminSecretKey !== correctAdminSecret){
+            if(result.data.adminSecretKey !== correctAdminSecret){
                 return res.status(403).json({
-                    message:"Invalid admin secret key"
+                    message: "Invalid admin secret key",
+                    errors: [{ field: "adminSecretKey", message: "The admin secret key you entered is incorrect" }]
                 })
             }
         }
         
-        const hashedPassword=await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(result.data.password, 10);
         const permissions = ROLE_PERMISSIONS[userRole] || ROLE_PERMISSIONS.customer;
         
-        const newUser=await UserModel.create({
-            name, 
-            email,
-            password:hashedPassword,
+        const newUser = await UserModel.create({
+            name: result.data.name, 
+            email: result.data.email,
+            password: hashedPassword,
             role: userRole,
             permissions: permissions,
             isActive: true
@@ -86,30 +107,53 @@ export async function registerUser(req, res){
 
 export async function loginUser(req, res){ 
 
-     const {email, password}=req.body; 
+     const {email, password} = req.body;
+     
+     // Enhanced Zod validation for login
+     const LoginRules = z.object({
+         email: z.string()
+             .email("Please enter a valid email address")
+             .toLowerCase()
+             .trim(),
+         password: z.string()
+             .min(1, "Password is required")
+     });
+     
+     const result = LoginRules.safeParse({email, password});
+     
+     if(!result.success){
+         const errors = result.error.errors.map(err => ({
+             field: err.path.join('.'),
+             message: err.message
+         }));
+         
+         return res.status(400).json({
+             message: "Validation failed",
+             errors: errors
+         });
+     }
+     
      try{
-        const existingUser=await UserModel.findOne({email});
-        if (!email || !password || email.trim() === "" || password.trim() === ""){
-              return res.status(400).json({
-                message:"enter valid credentials"
-            })
-        }
+        const existingUser = await UserModel.findOne({ email: result.data.email });
         if(!existingUser){
             return res.status(400).json({
-                message:"user with this email not found"
+                message: "Invalid email or password",
+                errors: [{ field: "email", message: "No account found with this email address" }]
             })
         }
         
         if(!existingUser.isActive){
             return res.status(403).json({
-                message:"Account is inactive. Contact administrator."
+                message: "Account is inactive",
+                errors: [{ field: "email", message: "Your account has been deactivated. Please contact administrator." }]
             })
         }
         
-        const isPasswordValid  = await bcrypt.compare(password, existingUser.password);
-        if(!isPasswordValid ){
+        const isPasswordValid = await bcrypt.compare(result.data.password, existingUser.password);
+        if(!isPasswordValid){
            return res.status(400).json({
-                message:"wrong password"
+                message: "Invalid email or password",
+                errors: [{ field: "password", message: "Incorrect password" }]
             })
         }
         
