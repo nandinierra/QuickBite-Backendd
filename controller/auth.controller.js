@@ -1,3 +1,4 @@
+
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"; 
 import UserModel from "../model/user.model.js"; 
@@ -6,7 +7,7 @@ import {z} from "zod";
 const ROLE_PERMISSIONS = {
   customer: ["read_food"],
   admin: ["read_food", "create_food", "update_food", "delete_food", "manage_users", "view_orders", "manage_orders"],
-  moderator: ["read_food", "view_orders", "manage_orders"]
+  
 };
 
 export async function registerUser(req, res){
@@ -28,8 +29,8 @@ export async function registerUser(req, res){
             .min(6, "Password must be at least 6 characters long")
             .max(50, "Password must not exceed 50 characters")
             .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Password must contain at least one uppercase letter, one lowercase letter, and one number"),
-        role: z.enum(["customer", "admin", "moderator"], {
-            errorMap: () => ({ message: "Role must be either customer, admin, or moderator" })
+        role: z.enum(["customer", "admin"], {
+            errorMap: () => ({ message: "Role must be either customer, admin" })
         }).optional().default("customer"),
         adminSecretKey: z.string().optional()
     });
