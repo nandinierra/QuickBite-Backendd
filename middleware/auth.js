@@ -1,83 +1,82 @@
 import jwt from "jsonwebtoken"
 
-export const verifyUser=(req, res, next)=>{
-   const headers = req.headers.authorization
-    const token = headers?.split(" ")[1]
-    if(!token){
-         return  res.status(401).json({
-             message:"Token not found"
-           })
+export const verifyUser = (req, res, next) => {
+  const token = req.cookies.jwt_token || req.headers.authorization?.split(" ")[1];
 
-    } 
+  if (!token) {
+    return res.status(401).json({
+      message: "Token not found"
+    })
 
-   try{
-      const decoded = jwt.verify(token, process.env.SECRETCODE) 
-      req.user=decoded;
-      next();
-      
-   }catch(error){
-        return res.status(401).json({
-            message:"Invalid or expired token"
-         })
-   }
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.SECRETCODE)
+    req.user = decoded;
+    next();
+
+  } catch (error) {
+    return res.status(401).json({
+      message: "Invalid or expired token"
+    })
+  }
 
 }
 
-export const verifyAdmin=(req, res, next)=>{
-   const headers = req.headers.authorization
-    const token = headers?.split(" ")[1]
-    if(!token){
-         return  res.status(401).json({
-             message:"Token not found"
-           })
+export const verifyAdmin = (req, res, next) => {
+  const token = req.cookies.jwt_token || req.headers.authorization?.split(" ")[1];
 
-    } 
+  if (!token) {
+    return res.status(401).json({
+      message: "Token not found"
+    })
 
-   try{
-      const decoded = jwt.verify(token, process.env.SECRETCODE) 
-      
-      if(decoded.role !== "admin"){
-         return res.status(403).json({
-            message:"Unauthorized: Admin access required"
-         })
-      }
-      
-      req.user=decoded;
-      next();
-      
-   }catch(error){
-        return res.status(401).json({
-            message:"Invalid or expired token"
-         })
-   }
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.SECRETCODE)
+
+    if (decoded.role !== "admin") {
+      return res.status(403).json({
+        message: "Unauthorized: Admin access required"
+      })
+    }
+
+    req.user = decoded;
+    next();
+
+  } catch (error) {
+    return res.status(401).json({
+      message: "Invalid or expired token"
+    })
+  }
 
 }
 
 export const verifyRole = (allowedRoles) => {
   return (req, res, next) => {
-    const headers = req.headers.authorization;
-    const token = headers?.split(" ")[1];
-    
-    if(!token){
+    const token = req.cookies.jwt_token || req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
       return res.status(401).json({
-        message:"Token not found"
+        message: "Token not found"
       });
     }
-    
+
     try {
       const decoded = jwt.verify(token, process.env.SECRETCODE);
-      
-      if(!allowedRoles.includes(decoded.role)){
+
+      if (!allowedRoles.includes(decoded.role)) {
         return res.status(403).json({
-          message:`Unauthorized: Only ${allowedRoles.join(", ")} can access this resource`
+          message: `Unauthorized: Only ${allowedRoles.join(", ")} can access this resource`
         });
       }
-      
+
       req.user = decoded;
       next();
-    } catch(error) {
+    } catch (error) {
       return res.status(401).json({
-        message:"Invalid or expired token"
+        message: "Invalid or expired token"
       });
     }
   };
@@ -85,29 +84,28 @@ export const verifyRole = (allowedRoles) => {
 
 export const verifyPermission = (requiredPermission) => {
   return (req, res, next) => {
-    const headers = req.headers.authorization;
-    const token = headers?.split(" ")[1];
-    
-    if(!token){
+    const token = req.cookies.jwt_token || req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
       return res.status(401).json({
-        message:"Token not found"
+        message: "Token not found"
       });
     }
-    
+
     try {
       const decoded = jwt.verify(token, process.env.SECRETCODE);
-      
-      if(!decoded.permissions || !decoded.permissions.includes(requiredPermission)){
+
+      if (!decoded.permissions || !decoded.permissions.includes(requiredPermission)) {
         return res.status(403).json({
-          message:`Unauthorized: ${requiredPermission} permission required`
+          message: `Unauthorized: ${requiredPermission} permission required`
         });
       }
-      
+
       req.user = decoded;
       next();
-    } catch(error) {
+    } catch (error) {
       return res.status(401).json({
-        message:"Invalid or expired token"
+        message: "Invalid or expired token"
       });
     }
   };
@@ -115,33 +113,32 @@ export const verifyPermission = (requiredPermission) => {
 
 export const verifyMultiplePermissions = (requiredPermissions) => {
   return (req, res, next) => {
-    const headers = req.headers.authorization;
-    const token = headers?.split(" ")[1];
-    
-    if(!token){
+    const token = req.cookies.jwt_token || req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
       return res.status(401).json({
-        message:"Token not found"
+        message: "Token not found"
       });
     }
-    
+
     try {
       const decoded = jwt.verify(token, process.env.SECRETCODE);
-      
+
       const hasAllPermissions = requiredPermissions.every(
         perm => decoded.permissions && decoded.permissions.includes(perm)
       );
-      
-      if(!hasAllPermissions){
+
+      if (!hasAllPermissions) {
         return res.status(403).json({
-          message:`Unauthorized: ${requiredPermissions.join(", ")} permissions required`
+          message: `Unauthorized: ${requiredPermissions.join(", ")} permissions required`
         });
       }
-      
+
       req.user = decoded;
       next();
-    } catch(error) {
+    } catch (error) {
       return res.status(401).json({
-        message:"Invalid or expired token"
+        message: "Invalid or expired token"
       });
     }
   };
