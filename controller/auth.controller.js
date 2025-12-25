@@ -176,10 +176,10 @@ export async function loginUser(req, res) {
 
         res.cookie("jwt_token", jwtToken, {
             httpOnly: true,
-            secure: false, // Force false for local debugging
-            sameSite: "lax", // Explicitly Lax
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             maxAge: 30 * 24 * 60 * 60 * 1000,
-            path: "/" // Explicit path
+            path: "/"
         });
 
         return res.status(200).json({
