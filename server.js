@@ -18,7 +18,7 @@ const url = process.env.URL;
 
 
 app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:5174", "https://quick-bite-frontend-ten.vercel.app", "https://quick-bite-frontend-eight.vercel.app"],
+  origin: ["http://localhost:5173", "http://localhost:5174", "https://quick-bite-frontend-eight.vercel.app"],
   credentials: true,
 }));
 app.use(express.json())

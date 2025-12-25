@@ -170,8 +170,21 @@ export async function loginUser(req, res) {
 
         await UserModel.findByIdAndUpdate(existingUser._id, { lastLogin: new Date() }, { new: true })
 
+        console.log("--- Login User ---");
+        console.log("NODE_ENV:", process.env.NODE_ENV);
+        console.log("Setting jwt_token cookie...");
+
+        res.cookie("jwt_token", jwtToken, {
+            httpOnly: true,
+            secure: false, // Force false for local debugging
+            sameSite: "lax", // Explicitly Lax
+            maxAge: 30 * 24 * 60 * 60 * 1000,
+            path: "/" // Explicit path
+        });
+
         return res.status(200).json({
-            token: jwtToken,
+            // token: jwtToken, // Token removed from body
+            message: "Login successful",
             user: {
                 _id: existingUser._id,
                 name: existingUser.name,
@@ -213,4 +226,13 @@ export const finalRes = async (req, res) => {
             message: error.message || "Failed to verify user"
         })
     }
+}
+
+export const logoutUser = (req, res) => {
+    res.clearCookie("jwt_token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+    });
+    return res.status(200).json({ message: "Logout successful" });
 }
