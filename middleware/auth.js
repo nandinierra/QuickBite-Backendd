@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken"
 
 export const verifyUser = (req, res, next) => {
-  const token = req.cookies.jwt_token || req.headers.authorization?.split(" ")[1];
-
+  const headers = req.headers.authorization
+  const token = headers?.split(" ")[1]
   if (!token) {
     return res.status(401).json({
       message: "Token not found"
@@ -24,8 +24,8 @@ export const verifyUser = (req, res, next) => {
 }
 
 export const verifyAdmin = (req, res, next) => {
-  const token = req.cookies.jwt_token || req.headers.authorization?.split(" ")[1];
-
+  const headers = req.headers.authorization
+  const token = headers?.split(" ")[1]
   if (!token) {
     return res.status(401).json({
       message: "Token not found"
@@ -55,7 +55,8 @@ export const verifyAdmin = (req, res, next) => {
 
 export const verifyRole = (allowedRoles) => {
   return (req, res, next) => {
-    const token = req.cookies.jwt_token || req.headers.authorization?.split(" ")[1];
+    const headers = req.headers.authorization;
+    const token = headers?.split(" ")[1];
 
     if (!token) {
       return res.status(401).json({
@@ -84,7 +85,8 @@ export const verifyRole = (allowedRoles) => {
 
 export const verifyPermission = (requiredPermission) => {
   return (req, res, next) => {
-    const token = req.cookies.jwt_token || req.headers.authorization?.split(" ")[1];
+    const headers = req.headers.authorization;
+    const token = headers?.split(" ")[1];
 
     if (!token) {
       return res.status(401).json({
@@ -113,7 +115,8 @@ export const verifyPermission = (requiredPermission) => {
 
 export const verifyMultiplePermissions = (requiredPermissions) => {
   return (req, res, next) => {
-    const token = req.cookies.jwt_token || req.headers.authorization?.split(" ")[1];
+    const headers = req.headers.authorization;
+    const token = headers?.split(" ")[1];
 
     if (!token) {
       return res.status(401).json({

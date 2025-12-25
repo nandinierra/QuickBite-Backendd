@@ -166,21 +166,12 @@ export async function loginUser(req, res) {
             role: existingUser.role,
             permissions: existingUser.permissions
         }
-
         const jwtToken = jwt.sign(payload, secretCode, { expiresIn: "30d" })
 
         await UserModel.findByIdAndUpdate(existingUser._id, { lastLogin: new Date() }, { new: true })
 
-        res.cookie("jwt_token", jwtToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Adjust based on deployment
-            maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
-        });
-
         return res.status(200).json({
-            // token:jwtToken, // Removed token from body
-            message: "Login successful",
+            token: jwtToken,
             user: {
                 _id: existingUser._id,
                 name: existingUser.name,
