@@ -42,7 +42,10 @@ export const filterfood = async (req, res) => {
     const { type, search } = req.query;
     const { category } = req.params;
 
-    const filter = { category: { $regex: `^${category}$`, $options: "i" }, isActive: true };
+    const filter = { 
+      category: { $regex: `^${category}$`, $options: "i" },
+       isActive: true
+    };
 
     if (type && type !== "All") {
       filter.type = type;
